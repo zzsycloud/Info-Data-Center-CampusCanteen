@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="食堂档案：营业时间、楼层档口、客流曲线，以及菜品的新增、修改、删除维护功能">
+  <title>食堂档案 · 校园食堂信息与数据展示中心</title>
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%8D%9C%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="vendor/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="cc-nav-host"></div>
+
+  <main class="container py-3" id="cc-main">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+      <div>
+        <h1 class="cc-page-title">食堂档案与菜品维护</h1>
+        <p class="cc-page-sub">
+          <i class="bi bi-shop"></i> 查看三个食堂的营业信息与客流曲线，并在本地维护菜品（新增 / 修改 / 删除）
+        </p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-sm btn-outline-secondary" href="dishes.html"><i class="bi bi-search"></i> 去菜品查询</a>
+        <button class="btn btn-sm btn-primary" type="button" id="cc-add-dish">
+          <i class="bi bi-plus-lg"></i> 新增菜品
+        </button>
+      </div>
+    </div>
+
+    <div id="cc-canteens-alert" class="mb-3" aria-live="polite"></div>
+
+    <!-- 食堂选择 -->
+    <ul class="nav nav-tabs mb-3" id="cc-canteen-tabs" role="tablist"></ul>
+
+    <!-- 第一行：食堂档案 + 分时段客流（并排，紧凑） -->
+    <div class="row g-3">
+      <div class="col-12 col-xl-5">
+        <section class="cc-card" id="cc-profile" aria-live="polite"></section>
+      </div>
+
+      <div class="col-12 col-xl-7">
+        <section class="cc-chart-card" aria-labelledby="canteen-traffic-title">
+          <div class="cc-chart-card__head">
+            <div>
+              <h2 class="cc-chart-card__title" id="canteen-traffic-title">
+                <i class="bi bi-bar-chart-steps"></i> 分时段客流与排队时长
+              </h2>
+              <p class="cc-chart-card__sub">数据源：stats.json → traffic / waitMinutes（Chart.js 柱线混合图）</p>
+            </div>
+            <div class="btn-group btn-group-sm" role="group" aria-label="工作日或周末">
+              <button type="button" class="btn btn-outline-secondary active" data-daytype="weekday">工作日</button>
+              <button type="button" class="btn btn-outline-secondary" data-daytype="weekend">周末</button>
+            </div>
+          </div>
+          <div id="cc-canteen-traffic-chart" class="cc-chart" role="img" aria-label="分时段客流柱状图与排队时长折线图"></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- 第二行：楼层与档口分布（整行，横向排布更紧凑） -->
+    <section class="cc-card mt-3" aria-labelledby="canteen-floor-title">
+      <h2 class="cc-section-title" id="canteen-floor-title"><i class="bi bi-layers"></i> 楼层与档口分布</h2>
+      <div class="row g-2" id="cc-floor-list"></div>
+    </section>
+
+    <!-- 第三行：菜品维护（整行，表格获得完整宽度，不再挤压换行） -->
+    <section class="cc-card mt-3" aria-labelledby="manage-title">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <h2 class="cc-section-title mb-0" id="manage-title"><i class="bi bi-tools"></i> 菜品维护（本地数据）</h2>
+        <div class="d-flex gap-2 flex-wrap">
+          <div class="input-group input-group-sm" style="width:220px">
+            <span class="input-group-text"><i class="bi bi-funnel"></i></span>
+            <input type="search" class="form-control" id="cc-manage-search" placeholder="按名称/档口筛选" aria-label="筛选菜品">
+          </div>
+          <select class="form-select form-select-sm" id="cc-manage-scope" style="width:auto" aria-label="范围选择">
+            <option value="current">仅当前食堂</option>
+            <option value="all">全部食堂</option>
+          </select>
+          <button class="btn btn-sm btn-outline-secondary" type="button" id="cc-reset-local">
+            <i class="bi bi-arrow-counterclockwise"></i> 还原全部本地修改
+          </button>
+        </div>
+      </div>
+
+      <div id="cc-manage-summary" class="cc-hint mb-2"></div>
+      <div class="cc-table-wrap">
+        <table class="cc-table cc-table--wide table table-sm table-hover align-middle mb-0">
+          <caption class="visually-hidden">菜品维护表格，可修改或删除菜品</caption>
+          <thead>
+            <tr>
+              <th scope="col">编号</th>
+              <th scope="col">菜品名称</th>
+              <th scope="col">食堂 / 档口</th>
+              <th scope="col">类别</th>
+              <th scope="col" class="cc-num">价格</th>
+              <th scope="col" class="cc-num">热量</th>
+              <th scope="col" class="cc-num">评分</th>
+              <th scope="col">来源</th>
+              <th scope="col">操作</th>
+            </tr>
+          </thead>
+            <tbody id="cc-manage-body"></tbody>
+          </table>
+        </div>
+
+        <nav class="mt-2 d-flex justify-content-center" aria-label="维护表分页">
+          <ul class="pagination pagination-sm mb-0" id="cc-manage-pagination"></ul>
+        </nav>
+
+        <div class="mt-2" id="cc-deleted-box"></div>
+    </section>
+
+    <section class="cc-debug-host" id="cc-debug-panel"></section>
+  </main>
+
+  <!-- ============ 菜品表单弹窗 ============ -->
+  <div class="modal fade" id="cc-dish-modal" tabindex="-1" aria-labelledby="cc-dish-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="cc-dish-modal-title">新增菜品</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+        </div>
+        <form id="cc-dish-form" novalidate>
+          <div class="modal-body">
+            <!-- 表单级错误汇总 -->
+            <div id="cc-form-errors" class="d-none mb-3" role="alert" aria-live="assertive"></div>
+
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="d-name">菜品名称 <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="d-name" name="name" maxlength="20" required
+                       placeholder="例如：香菇滑鸡饭" aria-describedby="d-name-help">
+                <div class="cc-hint" id="d-name-help">2-20 个字符，不能与现有菜品重名</div>
+                <div class="invalid-feedback" id="err-name"></div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="d-canteenId">所属食堂 <span class="text-danger">*</span></label>
+                <select class="form-select" id="d-canteenId" name="canteenId" required></select>
+                <div class="invalid-feedback" id="err-canteenId"></div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="d-stall">档口名称 <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="d-stall" name="stall" maxlength="24" required
+                       placeholder="例如：二层 · 特色小炒" list="cc-stall-list">
+                <datalist id="cc-stall-list"></datalist>
+                <div class="invalid-feedback" id="err-stall"></div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="d-category">菜品类别 <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="d-category" name="category" list="cc-category-list" required
+                       placeholder="可从下拉选择，也可自行填写">
+                <datalist id="cc-category-list"></datalist>
+                <div class="invalid-feedback" id="err-category"></div>
+              </div>
+
+              <div class="col-6 col-md-3">
+                <label class="form-label" for="d-price">价格（元）<span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="d-price" name="price" min="0.5" max="200" step="0.5" required placeholder="12.0">
+                <div class="invalid-feedback" id="err-price"></div>
+              </div>
+
+              <div class="col-6 col-md-3">
+                <label class="form-label" for="d-calories">热量（kcal）<span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="d-calories" name="calories" min="1" max="3000" step="1" required placeholder="650">
+                <div class="invalid-feedback" id="err-calories"></div>
+              </div>
+
+              <div class="col-6 col-md-3">
+                <label class="form-label" for="d-protein">蛋白质（g）<span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="d-protein" name="protein" min="0" max="200" step="0.1" required placeholder="30.0">
+                <div class="invalid-feedback" id="err-protein"></div>
+              </div>
+
+              <div class="col-6 col-md-3">
+                <label class="form-label" for="d-rating">评分（0-5）<span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="d-rating" name="rating" min="0" max="5" step="0.1" required placeholder="4.5">
+                <div class="invalid-feedback" id="err-rating"></div>
+              </div>
+
+              <div class="col-6 col-md-4">
+                <label class="form-label" for="d-monthlySales">月销量（份）</label>
+                <input type="number" class="form-control" id="d-monthlySales" name="monthlySales" min="0" max="100000" step="10" placeholder="1500">
+                <div class="invalid-feedback" id="err-monthlySales"></div>
+              </div>
+
+              <div class="col-6 col-md-4">
+                <label class="form-label" for="d-spicy">辣度</label>
+                <select class="form-select" id="d-spicy" name="spicy">
+                  <option value="0">0 · 不辣</option>
+                  <option value="1">1 · 微辣</option>
+                  <option value="2">2 · 中辣</option>
+                  <option value="3">3 · 重辣</option>
+                </select>
+                <div class="invalid-feedback" id="err-spicy"></div>
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label class="form-label" for="d-tags">标签（逗号或空格分隔，最多 5 个）</label>
+                <input type="text" class="form-control" id="d-tags" name="tags" placeholder="招牌, 下饭">
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">供应时段</label>
+                <div class="cc-chips">
+                  <label class="cc-chip"><input type="checkbox" value="早餐" class="form-check-input me-1" data-supply> 早餐</label>
+                  <label class="cc-chip"><input type="checkbox" value="午餐" class="form-check-input me-1" data-supply checked> 午餐</label>
+                  <label class="cc-chip"><input type="checkbox" value="晚餐" class="form-check-input me-1" data-supply checked> 晚餐</label>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">属性</label>
+                <div class="d-flex flex-wrap gap-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="d-vegetarian" name="vegetarian">
+                    <label class="form-check-label" for="d-vegetarian">素食</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="d-isNew" name="isNew">
+                    <label class="form-check-label" for="d-isNew">新品</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="d-signature" name="signature">
+                    <label class="form-check-label" for="d-signature">招牌菜</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer justify-content-between">
+            <span class="cc-hint" id="cc-form-mode">当前为新增模式</span>
+            <div>
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
+              <button type="submit" class="btn btn-primary" id="cc-form-submit">
+                <i class="bi bi-save"></i> 保存
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="cc-footer-host"></div>
+
+  <script src="vendor/jquery.min.js"></script>
+  <script src="vendor/bootstrap.bundle.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/data-bundle.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/data-api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/query.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/page-canteens.js"></script>
+</body>
+</html>
