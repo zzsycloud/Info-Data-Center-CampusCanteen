@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="校园食堂信息与数据展示中心：食堂概览、菜品查询、客流与营养数据图表、三维食堂总览">
+  <meta name="author" content="软件开发综合实践 期末大作业">
+  <title>首页 · 校园食堂信息与数据展示中心</title>
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%8D%9C%3C/text%3E%3C/svg%3E">
+
+  <!-- 第三方样式（全部本地化，无需联网） -->
+  <link rel="stylesheet" href="vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="vendor/bootstrap-icons.css">
+  <!-- 自定义样式 -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 顶部导航（由 js/ui.js 注入，便于全站统一维护） -->
+  <div id="cc-nav-host"></div>
+
+  <main class="container py-3" id="cc-main">
+    <!-- 数据来源徽标由 ui.js 插入到这里 -->
+
+    <!-- ============ 页面标题 ============ -->
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+      <div>
+        <h1 class="cc-page-title">校园食堂信息与数据展示中心</h1>
+        <p class="cc-page-sub">
+          <i class="bi bi-geo-alt"></i> 云南大学 · 呈贡校区 ·
+          <span id="cc-clock" class="cc-mono">--:--:--</span> ·
+          数据更新于 <span id="cc-updated">2025-01-06</span>
+        </p>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-secondary" id="cc-refresh-home" type="button">
+          <i class="bi bi-arrow-clockwise"></i> 刷新数据
+        </button>
+        <a class="btn btn-sm btn-primary" href="dishes.html">
+          <i class="bi bi-search"></i> 去查菜品
+        </a>
+      </div>
+    </div>
+
+    <!-- ============ 加载中 / 错误 提示区 ============ -->
+    <div id="cc-home-alert" class="mb-3" aria-live="polite"></div>
+
+    <!-- ============ KPI 指标卡 ============ -->
+    <section class="row g-3 mb-3" id="cc-kpi-row" aria-label="关键指标">
+      <div class="col-6 col-lg-3">
+        <div class="cc-card cc-card--hover">
+          <div class="cc-kpi">
+            <div class="cc-kpi__icon"><i class="bi bi-egg-fried"></i></div>
+            <div>
+              <div class="cc-kpi__value" id="kpi-dishes">—</div>
+              <div class="cc-kpi__label">在售菜品</div>
+              <div class="cc-kpi__delta cc-kpi__delta--up" id="kpi-dishes-sub">加载中…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="cc-card cc-card--hover">
+          <div class="cc-kpi">
+            <div class="cc-kpi__icon cc-kpi__icon--orange"><i class="bi bi-cash-coin"></i></div>
+            <div>
+              <div class="cc-kpi__value" id="kpi-price">—</div>
+              <div class="cc-kpi__label">菜品平均单价</div>
+              <div class="cc-kpi__delta" id="kpi-price-sub">加载中…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="cc-card cc-card--hover">
+          <div class="cc-kpi">
+            <div class="cc-kpi__icon cc-kpi__icon--green"><i class="bi bi-people"></i></div>
+            <div>
+              <div class="cc-kpi__value" id="kpi-traffic">—</div>
+              <div class="cc-kpi__label">本月总客流</div>
+              <div class="cc-kpi__delta cc-kpi__delta--up" id="kpi-traffic-sub">加载中…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="cc-card cc-card--hover">
+          <div class="cc-kpi">
+            <div class="cc-kpi__icon cc-kpi__icon--purple"><i class="bi bi-star-half"></i></div>
+            <div>
+              <div class="cc-kpi__value" id="kpi-rating">—</div>
+              <div class="cc-kpi__label">平均满意度</div>
+              <div class="cc-kpi__delta" id="kpi-rating-sub">加载中…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 食堂实时概览 ============ -->
+    <section class="cc-card mb-3" aria-labelledby="home-canteen-title">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2 class="cc-section-title mb-0" id="home-canteen-title">
+          <i class="bi bi-buildings"></i> 食堂实时概览
+        </h2>
+        <a class="btn btn-sm btn-outline-primary" href="canteens.html">全部档案 <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="row g-3" id="cc-canteen-cards">
+        <div class="col-12"><div class="cc-skeleton"><div class="cc-skeleton__row"><span class="cc-skeleton__bar"></span></div></div></div>
+      </div>
+    </section>
+
+    <!-- ============ 今日推荐 ============ -->
+    <section class="cc-card mb-3" aria-labelledby="home-pick-title">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2 class="cc-section-title mb-0" id="home-pick-title"><i class="bi bi-hand-thumbs-up"></i> 今日推荐</h2>
+        <button class="btn btn-sm btn-outline-secondary" id="cc-reroll-pick" type="button">
+          <i class="bi bi-shuffle"></i> 换一批
+        </button>
+      </div>
+      <div class="row g-3" id="cc-pick-list"></div>
+    </section>
+
+    <!-- ============ 公告 + 客流趋势（两栏并排） ============ -->
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-lg-6">
+        <section class="cc-card h-100" aria-labelledby="home-notice-title">
+          <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+            <h2 class="cc-section-title mb-0" id="home-notice-title"><i class="bi bi-megaphone"></i> 食堂公告</h2>
+            <div class="btn-group btn-group-sm" role="group" aria-label="公告筛选">
+              <button type="button" class="btn btn-outline-secondary active" data-notice-filter="all">全部</button>
+              <button type="button" class="btn btn-outline-secondary" data-notice-filter="warn">提醒</button>
+              <button type="button" class="btn btn-outline-secondary" data-notice-filter="event">活动</button>
+            </div>
+          </div>
+          <div id="cc-notice-list"></div>
+        </section>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <section class="cc-chart-card h-100" aria-labelledby="home-traffic-title">
+          <div class="cc-chart-card__head">
+            <div>
+              <h2 class="cc-chart-card__title" id="home-traffic-title">
+                <i class="bi bi-graph-up"></i> 今日客流趋势
+              </h2>
+              <p class="cc-chart-card__sub">数据源：stats.json → traffic.hourly（工作日）</p>
+            </div>
+            <select class="form-select form-select-sm" id="cc-home-canteen-select" style="width:auto" aria-label="选择食堂"></select>
+          </div>
+          <div id="cc-home-traffic-chart" class="cc-chart" role="img" aria-label="各食堂分时段客流折线图"></div>
+          <p class="cc-hint mb-0 mt-2" id="cc-home-traffic-tip"></p>
+        </section>
+      </div>
+    </div>
+
+    <!-- ============ 功能入口 ============ -->
+    <section class="cc-card" aria-labelledby="home-entry-title">
+      <h2 class="cc-section-title" id="home-entry-title"><i class="bi bi-signpost-split"></i> 功能入口</h2>
+      <div class="row g-2" id="cc-entry-list"></div>
+    </section>
+
+    <!-- 调试面板（演示错误提示用） -->
+    <section class="cc-debug-host" id="cc-debug-panel"></section>
+  </main>
+
+  <div id="cc-footer-host"></div>
+
+  <!-- ============ 脚本：本地化，顺序不能变 ============ -->
+  <script src="vendor/jquery.min.js"></script>
+  <script src="vendor/bootstrap.bundle.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/data-bundle.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/data-api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/query.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/page-home.js"></script>
+</body>
+</html>
