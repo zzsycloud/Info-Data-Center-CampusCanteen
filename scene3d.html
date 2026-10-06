@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="三维总览：使用 Three.js 构建校园食堂三维模型，支持旋转、缩放、平移、点击查看详情">
+  <title>三维总览 · 校园食堂信息与数据展示中心</title>
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%8D%9C%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="vendor/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="cc-nav-host"></div>
+
+  <main class="container py-3" id="cc-main">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+      <div>
+        <h1 class="cc-page-title">食堂三维总览</h1>
+        <p class="cc-page-sub">
+          <i class="bi bi-badge-3d"></i> Three.js 场景：鼠标左键拖拽旋转 · 滚轮缩放 · 右键平移 · 点击楼栋查看详情 · 手机支持单指旋转 / 双指缩放
+        </p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-sm btn-outline-secondary" type="button" id="cc-scene-reload">
+          <i class="bi bi-arrow-clockwise"></i> 重新加载数据
+        </button>
+      </div>
+    </div>
+
+    <div id="cc-scene-alert" class="mb-3" aria-live="polite"></div>
+
+    <!-- 三维场景：整行铺满，画布更大、左右留白更少 -->
+    <div class="cc-scene-shell">
+      <canvas id="cc-scene-canvas" aria-label="校园食堂三维模型，可旋转缩放"></canvas>
+
+      <!-- 左上角实时信息 -->
+      <div class="cc-scene-overlay">
+        <div class="cc-scene-badge" id="cc-scene-info">
+          <b>正在加载三维场景…</b>
+          <div style="font-size:.76rem;color:#5b6a7d">数据来自 data/canteens.json</div>
+        </div>
+      </div>
+
+      <!-- 图例 -->
+      <div class="cc-scene-legend" id="cc-scene-legend"></div>
+
+      <!-- 操作提示 -->
+      <div class="cc-scene-tip">
+        <i class="bi bi-mouse2"></i> 左键拖拽旋转 ｜ <i class="bi bi-mouse"></i> 滚轮缩放 ｜ 右键平移<br>
+        <i class="bi bi-hand-index-thumb"></i> 点击楼栋选中，再按 <span class="cc-mono">R</span> 键聚焦；<span class="cc-mono">空格</span> 暂停自转
+      </div>
+
+      <!-- 加载 / 错误遮罩 -->
+      <div class="cc-scene-empty d-none" id="cc-scene-mask">
+        <div class="spinner-border text-light" role="status" aria-hidden="true"></div>
+        <p class="mb-0" id="cc-scene-mask-text">正在初始化 WebGL 场景…</p>
+      </div>
+    </div>
+
+    <!-- 场景工具条 -->
+    <div class="cc-card mt-3">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div class="cc-scene-toolbar">
+          <button class="btn btn-outline-primary btn-sm" type="button" id="btn-rotate">
+            <i class="bi bi-arrow-repeat"></i> 自动旋转：开
+          </button>
+          <button class="btn btn-outline-secondary btn-sm" type="button" id="btn-wire">
+            <i class="bi bi-grid-3x3"></i> 线框模式
+          </button>
+          <button class="btn btn-outline-secondary btn-sm" type="button" id="btn-explode">
+            <i class="bi bi-layers"></i> 楼层分层
+          </button>
+          <button class="btn btn-outline-secondary btn-sm" type="button" id="btn-time">
+            <i class="bi bi-clock-history"></i> 时段：<span id="btn-time-label">现在</span>
+          </button>
+          <button class="btn btn-outline-secondary btn-sm" type="button" id="btn-reset">
+            <i class="bi bi-arrows-angle-contract"></i> 复位视角
+          </button>
+          <button class="btn btn-outline-secondary btn-sm" type="button" id="btn-shot">
+            <i class="bi bi-camera"></i> 保存截图
+          </button>
+        </div>
+        <div class="cc-legend-inline" id="cc-scene-stats"></div>
+      </div>
+    </div>
+
+    <!-- 信息面板：两栏并排，紧凑且等高 -->
+    <div class="row g-3 mt-3">
+      <div class="col-12 col-lg-6">
+        <section class="cc-card h-100" id="cc-scene-detail" aria-live="polite">
+          <h2 class="cc-section-title"><i class="bi bi-building"></i> 楼栋详情</h2>
+          <p class="cc-hint mb-0">在三维场景中点击任意楼栋，这里会显示该食堂的完整信息与当前拥挤度。</p>
+        </section>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <section class="cc-card h-100">
+          <h2 class="cc-section-title"><i class="bi bi-sliders2"></i> 三维场景数据映射</h2>
+          <dl class="row mb-0 g-0" style="font-size:.84rem">
+            <dt class="col-5 cc-hint">楼栋尺寸</dt><dd class="col-7">canteens.json → position3d.width / depth</dd>
+            <dt class="col-5 cc-hint">楼栋高度</dt><dd class="col-7">按座位数 seats 线性映射（12 座位 = 0.1 单位）</dd>
+            <dt class="col-5 cc-hint">楼栋颜色</dt><dd class="col-7">canteens.json → color（蓝色为基准色）</dd>
+            <dt class="col-5 cc-hint">悬浮柱高度</dt><dd class="col-7">stats.json → traffic 当前时段在店人数</dd>
+            <dt class="col-5 cc-hint">悬浮柱颜色</dt><dd class="col-7">拥挤度分档（空闲 / 正常 / 较挤 / 拥挤）</dd>
+            <dt class="col-5 cc-hint">楼层分层</dt><dd class="col-7">canteens.json → floors.length</dd>
+          </dl>
+        </section>
+      </div>
+    </div>
+
+    <section class="cc-debug-host" id="cc-debug-panel"></section>
+  </main>
+
+  <div id="cc-footer-host"></div>
+
+  <script src="vendor/jquery.min.js"></script>
+  <script src="vendor/bootstrap.bundle.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/data-bundle.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/data-api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/query.js"></script>
+  <script src="js/ui.js"></script>
+  <!-- 三维库：本地优先；若文件缺失，onerror 会记录到 window.__CC_THREE_ERROR，页面给出明确提示 -->
+  <script src="vendor/three.min.js" onerror="window.__CC_THREE_ERROR='vendor/three.min.js 加载失败';"></script>
+  <script src="vendor/SimpleOrbit.js" onerror="window.__CC_ORBIT_ERROR='vendor/SimpleOrbit.js 加载失败';"></script>
+  <script src="js/page-scene3d.js"></script>
+</body>
+</html>
