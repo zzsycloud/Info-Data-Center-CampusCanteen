@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="菜品查询：按食堂、类别、价格、评分、辣度、素食等多条件筛选，支持搜索、排序、收藏与导出">
+  <title>菜品查询 · 校园食堂信息与数据展示中心</title>
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%8D%9C%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="vendor/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="cc-nav-host"></div>
+
+  <main class="container py-3" id="cc-main">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+      <div>
+        <h1 class="cc-page-title">菜品查询</h1>
+        <p class="cc-page-sub">
+          <i class="bi bi-funnel"></i> 支持多条件组合筛选、关键词搜索、排序与导出，筛选条件会同步到网址，可分享 / 收藏
+        </p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-sm btn-outline-secondary" type="button" id="cc-toggle-filter">
+          <i class="bi bi-sliders"></i> 展开 / 收起筛选面板
+        </button>
+        <button class="btn btn-sm btn-outline-primary" type="button" id="cc-export-csv">
+          <i class="bi bi-filetype-csv"></i> 导出当前结果
+        </button>
+      </div>
+    </div>
+
+    <div id="cc-dishes-alert" class="mb-3" aria-live="polite"></div>
+
+    <!-- ============ 筛选面板 ============ -->
+    <section class="cc-filter-bar mb-3" id="cc-filter-panel" aria-label="筛选条件">
+      <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-6 col-lg-3">
+          <label class="form-label" for="f-keyword">关键词搜索</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="search" class="form-control" id="f-keyword" placeholder="菜名 / 档口 / 标签，如：牛肉 招牌"
+                   autocomplete="off" aria-describedby="f-keyword-help">
+            <button class="btn btn-outline-secondary" type="button" id="f-keyword-clear" aria-label="清空关键词">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+          <div class="cc-hint" id="f-keyword-help">支持空格分隔的多个关键词，需全部命中</div>
+        </div>
+
+        <div class="col-6 col-md-3 col-lg-2">
+          <label class="form-label" for="f-canteen">食堂</label>
+          <select class="form-select form-select-sm" id="f-canteen"></select>
+        </div>
+
+        <div class="col-6 col-md-3 col-lg-2">
+          <label class="form-label" for="f-sort">排序方式</label>
+          <select class="form-select form-select-sm" id="f-sort">
+            <option value="recommend">综合推荐指数</option>
+            <option value="sales">月销量从高到低</option>
+            <option value="rating">评分从高到低</option>
+            <option value="priceAsc">价格从低到高</option>
+            <option value="priceDesc">价格从高到低</option>
+            <option value="caloriesAsc">热量从低到高</option>
+            <option value="nameAsc">名称（拼音序）</option>
+          </select>
+        </div>
+
+        <div class="col-6 col-md-3 col-lg-2">
+          <label class="form-label" for="f-supply">供应时段</label>
+          <select class="form-select form-select-sm" id="f-supply">
+            <option value="all">全部时段</option>
+            <option value="早餐">早餐</option>
+            <option value="午餐">午餐</option>
+            <option value="晚餐">晚餐</option>
+          </select>
+        </div>
+
+        <div class="col-6 col-md-3 col-lg-1">
+          <label class="form-label" for="f-rating">最低评分</label>
+          <select class="form-select form-select-sm" id="f-rating">
+            <option value="0">不限</option>
+            <option value="4">≥ 4.0</option>
+            <option value="4.3">≥ 4.3</option>
+            <option value="4.5">≥ 4.5</option>
+            <option value="4.7">≥ 4.7</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-lg-2">
+          <label class="form-label">辣度</label>
+          <div class="cc-chips" id="f-spicy-chips">
+            <button type="button" class="cc-chip is-on" data-spicy="all">不限</button>
+            <button type="button" class="cc-chip" data-spicy="mild">不辣/微辣</button>
+            <button type="button" class="cc-chip" data-spicy="hot">中辣以上</button>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+          <label class="form-label" for="f-price-min">
+            价格区间：<span class="cc-range-value" id="f-price-label">0 - 30 元</span>
+          </label>
+          <div class="d-flex align-items-center gap-2">
+            <input type="number" class="form-control form-control-sm" id="f-price-min" value="0" min="0" max="30" step="1" aria-label="最低价">
+            <span class="cc-hint">—</span>
+            <input type="number" class="form-control form-control-sm" id="f-price-max" value="30" min="0" max="30" step="1" aria-label="最高价">
+            <button class="btn btn-sm btn-outline-secondary text-nowrap" type="button" id="f-price-apply">应用</button>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-3">
+          <label class="form-label">快捷标签</label>
+          <div class="cc-chips">
+            <button type="button" class="cc-chip" data-toggle-flag="vegetarianOnly" id="chip-vegetarian">
+              <i class="bi bi-leaf"></i> 只看素食</button>
+            <button type="button" class="cc-chip" data-toggle-flag="newOnly" id="chip-new">
+              <i class="bi bi-stars"></i> 只看新品</button>
+            <button type="button" class="cc-chip" data-toggle-flag="signatureOnly" id="chip-signature">
+              <i class="bi bi-award"></i> 只看招牌</button>
+            <button type="button" class="cc-chip" data-toggle-flag="favoriteOnly" id="chip-favorite">
+              <i class="bi bi-star"></i> 只看收藏</button>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-5">
+          <label class="form-label">菜品类别（可多选）</label>
+          <div class="cc-chips" id="f-category-chips"></div>
+        </div>
+      </div>
+
+      <hr class="my-3">
+
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div class="cc-active-filters" id="cc-active-filters"></div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-outline-secondary" type="button" id="cc-reset-filter">
+            <i class="bi bi-arrow-counterclockwise"></i> 重置全部条件
+          </button>
+          <button class="btn btn-sm btn-primary" type="button" id="cc-apply-filter">
+            <i class="bi bi-check2-circle"></i> 应用筛选
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 结果统计条 ============ -->
+    <section class="cc-card mb-3 py-2" aria-label="结果统计">
+      <div class="row g-2 text-center" id="cc-result-stats">
+        <div class="col-6 col-md-3 col-lg-2"><div class="cc-hint">命中菜品</div><div class="fw-bold" id="st-count">—</div></div>
+        <div class="col-6 col-md-3 col-lg-2"><div class="cc-hint">平均价格</div><div class="fw-bold" id="st-price">—</div></div>
+        <div class="col-6 col-md-3 col-lg-2"><div class="cc-hint">平均评分</div><div class="fw-bold" id="st-rating">—</div></div>
+        <div class="col-6 col-md-3 col-lg-2"><div class="cc-hint">平均热量</div><div class="fw-bold" id="st-calories">—</div></div>
+        <div class="col-6 col-md-3 col-lg-2"><div class="cc-hint">素食占比</div><div class="fw-bold" id="st-veg">—</div></div>
+        <div class="col-6 col-md-3 col-lg-2"><div class="cc-hint">合计月销量</div><div class="fw-bold" id="st-sales">—</div></div>
+      </div>
+    </section>
+
+    <!-- ============ 结果列表 ============ -->
+    <section aria-label="菜品列表">
+      <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+        <h2 class="cc-section-title mb-0"><i class="bi bi-grid-3x3-gap"></i> 查询结果</h2>
+        <div class="d-flex align-items-center gap-2">
+          <label class="cc-hint mb-0" for="f-pagesize">每页</label>
+          <select class="form-select form-select-sm" id="f-pagesize" style="width:auto">
+            <option value="8">8 条</option>
+            <option value="12" selected>12 条</option>
+            <option value="24">24 条</option>
+          </select>
+          <span class="cc-hint" id="cc-page-info"></span>
+        </div>
+      </div>
+
+      <div class="row g-3" id="cc-dish-list"></div>
+      <nav class="mt-3 d-flex justify-content-center" aria-label="分页导航">
+        <ul class="pagination pagination-sm mb-0" id="cc-pagination"></ul>
+      </nav>
+    </section>
+
+    <section class="mt-4" id="cc-debug-panel"></section>
+  </main>
+
+  <div id="cc-footer-host"></div>
+
+  <script src="vendor/jquery.min.js"></script>
+  <script src="vendor/bootstrap.bundle.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/data-bundle.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/data-api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/query.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/page-dishes.js"></script>
+</body>
+</html>
