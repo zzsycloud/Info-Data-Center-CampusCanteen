@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="数据看板：使用 ECharts 与 Chart.js 展示客流趋势、价格分布与营养构成等六张图表">
+  <title>数据看板 · 校园食堂信息与数据展示中心</title>
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%8D%9C%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="vendor/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="cc-nav-host"></div>
+
+  <main class="container py-3" id="cc-main">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+      <div>
+        <h1 class="cc-page-title">数据看板</h1>
+        <p class="cc-page-sub">
+          <i class="bi bi-bar-chart-line"></i> 共 6 张图表：ECharts 5 张 + Chart.js 1 张，全部数据来自本地 JSON
+        </p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <div class="btn-group btn-group-sm" role="group" aria-label="图表引擎切换">
+          <button type="button" class="btn btn-outline-primary active" id="cc-engine-echarts">
+            <i class="bi bi-graph-up"></i> ECharts 渲染</button>
+          <button type="button" class="btn btn-outline-primary" id="cc-engine-chartjs">
+            <i class="bi bi-bar-chart"></i> Chart.js 渲染</button>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" type="button" id="cc-reload-analytics">
+          <i class="bi bi-arrow-clockwise"></i> 重新加载
+        </button>
+      </div>
+    </div>
+
+    <div id="cc-analytics-alert" class="mb-3" aria-live="polite"></div>
+
+    <!-- ============ 概览指标 ============ -->
+    <section class="row g-3 mb-3" aria-label="看板概览指标">
+      <div class="col-12 col-lg-4">
+        <div class="cc-card"><div class="cc-kpi">
+          <div class="cc-kpi__icon"><i class="bi bi-database"></i></div>
+          <div><div class="cc-kpi__value" id="an-records">—</div>
+          <div class="cc-kpi__label">参与统计的记录条数</div>
+          <div class="cc-hint" id="an-sources">—</div></div>
+        </div></div>
+      </div>
+      <div class="col-12 col-lg-4">
+        <div class="cc-card"><div class="cc-kpi">
+          <div class="cc-kpi__icon cc-kpi__icon--orange"><i class="bi bi-calendar3"></i></div>
+          <div><div class="cc-kpi__value" id="an-points">—</div>
+          <div class="cc-kpi__label">时间序列数据点</div>
+          <div class="cc-hint" id="an-points-sub">—</div></div>
+        </div></div>
+      </div>
+      <div class="col-12 col-lg-4">
+        <div class="cc-card"><div class="cc-kpi">
+          <div class="cc-kpi__icon cc-kpi__icon--green"><i class="bi bi-pie-chart"></i></div>
+          <div><div class="cc-kpi__value" id="an-charts">6</div>
+          <div class="cc-kpi__label">图表数量（2 个库）</div>
+          <div class="cc-hint">ECharts 5 / Chart.js 1</div></div>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- ============ 图表 1 / 2 ============ -->
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-xl-8">
+        <section class="cc-chart-card">
+          <div class="cc-chart-card__head">
+            <div>
+              <h2 class="cc-chart-card__title">图表 1 · 全年客流趋势与人均消费</h2>
+              <p class="cc-chart-card__sub" id="chart1-sub">折线为左轴人次、柱状为右轴元</p>
+            </div>
+            <div class="btn-group btn-group-sm" role="group" aria-label="数据范围">
+              <button type="button" class="btn btn-outline-secondary active" data-trend="all">全部食堂</button>
+              <button type="button" class="btn btn-outline-secondary" data-trend="CT01">仅一食堂</button>
+              <button type="button" class="btn btn-outline-secondary" data-trend="CT02">仅二食堂</button>
+              <button type="button" class="btn btn-outline-secondary" data-trend="CT03">仅三食堂</button>
+            </div>
+          </div>
+          <div id="chart-trend" class="cc-chart cc-chart--lg" role="img" aria-label="全年客流趋势折线图与人均消费柱状图"></div>
+        </section>
+      </div>
+      <div class="col-12 col-xl-4">
+        <section class="cc-chart-card">
+          <div class="cc-chart-card__head">
+            <div>
+              <h2 class="cc-chart-card__title">图表 2 · 菜品类目构成</h2>
+              <p class="cc-chart-card__sub" id="chart2-sub">数据源：dishes.json 实时折算（环形图）</p>
+            </div>
+          </div>
+          <div id="chart-category" class="cc-chart cc-chart--lg" role="img" aria-label="菜品类目占比环形图"></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ============ 图表 3 / 4 ============ -->
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-lg-6">
+        <section class="cc-chart-card">
+          <div class="cc-chart-card__head">
+            <div>
+              <h2 class="cc-chart-card__title">图表 3 · 价格与评分关系</h2>
+              <p class="cc-chart-card__sub" id="chart3-sub">每道菜品一个气泡，气泡越大月销量越高（散点图）</p>
+            </div>
+          </div>
+          <div id="chart-scatter" class="cc-chart" role="img" aria-label="菜品价格与评分散点图"></div>
+        </section>
+      </div>
+      <div class="col-12 col-lg-6">
+        <section class="cc-chart-card">
+          <div class="cc-chart-card__head">
+            <div>
+              <h2 class="cc-chart-card__title">图表 4 · 各食堂菜品均价与预算分布</h2>
+              <p class="cc-chart-card__sub" id="chart4-sub">柱状图为均价，折线为各价格区间菜品数占比（双轴）</p>
+            </div>
+          </div>
+          <div id="chart-price" class="cc-chart" role="img" aria-label="各食堂菜品均价柱状图与价格区间分布折线图"></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ============ 图表 5（整行） ============ -->
+    <div class="row g-3 mb-3">
+      <div class="col-12">
+        <section class="cc-chart-card">
+          <div class="cc-chart-card__head">
+            <div>
+              <h2 class="cc-chart-card__title">图表 5 · 分时段客流面积图（含高峰参考线）</h2>
+              <p class="cc-chart-card__sub" id="chart5-sub">数据源：stats.json → traffic.*.hourly</p>
+            </div>
+            <select class="form-select form-select-sm" id="chart5-daytype" style="width:auto" aria-label="选择工作日或周末">
+              <option value="hourly">工作日</option>
+              <option value="hourlyWeekend">周末</option>
+            </select>
+          </div>
+          <div id="chart-hourly" class="cc-chart" role="img" aria-label="三个食堂分时段客流面积图"></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ============ 图表 6（Chart.js，整行） ============ -->
+    <div class="row g-3 mb-3">
+      <div class="col-12">
+        <section class="cc-chart-card">
+          <div class="cc-chart-card__head">
+            <div>
+              <h2 class="cc-chart-card__title">
+                图表 6 · 代表菜品营养构成 <span class="cc-badge cc-badge--brand">Chart.js</span>
+              </h2>
+              <p class="cc-chart-card__sub">数据源：nutrition.items（热量 / 蛋白质 / 脂肪 / 碳水 分组柱状图）</p>
+            </div>
+            <select class="form-select form-select-sm" id="chart6-metric" style="width:auto" aria-label="选择营养指标">
+              <option value="all">全部指标</option>
+              <option value="calories">仅热量</option>
+              <option value="protein">仅蛋白质</option>
+              <option value="fat">仅脂肪</option>
+              <option value="carbs">仅碳水</option>
+            </select>
+          </div>
+          <div id="chart-nutrition" class="cc-chart" role="img" aria-label="代表菜品营养构成分组柱状图"></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ============ 数据核对表 ============ -->
+    <section class="cc-card" aria-labelledby="verify-title">
+      <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+        <h2 class="cc-section-title mb-0" id="verify-title"><i class="bi bi-table"></i> 图表数据核对表</h2>
+        <span class="cc-hint">表格数值与图表同源，可直接对照核验</span>
+      </div>
+      <ul class="nav nav-tabs mb-3" id="cc-verify-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-trend" type="button" role="tab">年度趋势</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-cate" type="button" role="tab">类目与价格</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-nutri" type="button" role="tab">营养</button>
+        </li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="tab-trend" role="tabpanel">
+          <div class="table-responsive cc-table-wrap"><table class="cc-table table table-sm table-hover mb-0">
+            <caption class="visually-hidden">各月客流与人均消费核对表</caption>
+            <thead><tr><th scope="col">月份</th><th scope="col" class="cc-num">第一食堂</th><th scope="col" class="cc-num">第二食堂</th>
+              <th scope="col" class="cc-num">第三食堂</th><th scope="col" class="cc-num">合计</th><th scope="col" class="cc-num">人均消费（元）</th></tr></thead>
+            <tbody id="tab-trend-body"></tbody>
+          </table></div>
+        </div>
+        <div class="tab-pane fade" id="tab-cate" role="tabpanel">
+          <div class="table-responsive cc-table-wrap"><table class="cc-table table table-sm table-hover mb-0">
+            <caption class="visually-hidden">菜品类目与价格核对表</caption>
+            <thead><tr><th scope="col">类别</th><th scope="col" class="cc-num">菜品数</th><th scope="col" class="cc-num">占比</th>
+              <th scope="col" class="cc-num">均价（元）</th><th scope="col" class="cc-num">最低</th><th scope="col" class="cc-num">最高</th>
+              <th scope="col">占比条</th></tr></thead>
+            <tbody id="tab-cate-body"></tbody>
+          </table></div>
+        </div>
+        <div class="tab-pane fade" id="tab-nutri" role="tabpanel">
+          <div class="table-responsive cc-table-wrap"><table class="cc-table table table-sm table-hover mb-0">
+            <caption class="visually-hidden">营养构成核对表</caption>
+            <thead><tr><th scope="col">菜品</th><th scope="col" class="cc-num">热量(kcal)</th><th scope="col" class="cc-num">蛋白质(g)</th>
+              <th scope="col" class="cc-num">脂肪(g)</th><th scope="col" class="cc-num">碳水(g)</th><th scope="col" class="cc-num">钠(mg)</th>
+              <th scope="col">午餐建议符合度</th></tr></thead>
+            <tbody id="tab-nutri-body"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cc-debug-host" id="cc-debug-panel"></section>
+  </main>
+
+  <div id="cc-footer-host"></div>
+
+  <script src="vendor/jquery.min.js"></script>
+  <script src="vendor/bootstrap.bundle.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/data-bundle.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/data-api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/query.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/page-analytics.js"></script>
+</body>
+</html>
