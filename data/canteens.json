@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "dataset": "食堂基础信息",
+    "version": "1.0.0",
+    "updated": "2025-01-06",
+    "campus": "示范大学 · 主校区",
+    "note": "三条食堂楼的基础档案，供首页概览、食堂档案页与三维场景共用。"
+  },
+  "list": [
+    {
+      "id": "CT01",
+      "name": "第一食堂",
+      "shortName": "一食堂",
+      "location": "学生宿舍 1 号楼东侧",
+      "brand": "大众快餐 · 保障型",
+      "floor": 2,
+      "seats": 1200,
+      "openHours": ["06:30-09:00", "11:00-13:30", "17:00-19:30"],
+      "openTime": "06:30",
+      "closeTime": "19:30",
+      "avgPrice": 11.5,
+      "rating": 4.3,
+      "stallCount": 12,
+      "dishCount": 96,
+      "floors": [
+        { "level": 1, "name": "一层 · 大众快餐", "stalls": 6 },
+        { "level": 2, "name": "二层 · 特色小炒", "stalls": 6 }
+      ],
+      "tags": ["离宿舍近", "出餐快", "性价比高"],
+      "position3d": { "x": -22, "z": 0, "width": 15, "depth": 11, "height": 6 },
+      "color": "#2f7fd6",
+      "contact": "饮食服务中心 021-8800-1001",
+      "description": "建校最早的食堂，主打两荤一素的称重快餐，一层为大众窗口，二层为现炒窗口，午高峰 11:40-12:20 排队最长。"
+    },
+    {
+      "id": "CT02",
+      "name": "第二食堂",
+      "shortName": "二食堂",
+      "location": "图书馆西侧 200 米",
+      "brand": "风味档口 · 特色型",
+      "floor": 3,
+      "seats": 900,
+      "openHours": ["06:30-09:30", "10:30-14:00", "16:30-20:00"],
+      "openTime": "06:30",
+      "closeTime": "20:00",
+      "avgPrice": 16.8,
+      "rating": 4.6,
+      "stallCount": 16,
+      "dishCount": 134,
+      "floors": [
+        { "level": 1, "name": "一层 · 面食早点", "stalls": 5 },
+        { "level": 2, "name": "二层 · 地方风味", "stalls": 6 },
+        { "level": 3, "name": "三层 · 轻食水吧", "stalls": 5 }
+      ],
+      "tags": ["品类最全", "评分最高", "适合聚餐"],
+      "position3d": { "x": 0, "z": 0, "width": 19, "depth": 13, "height": 9 },
+      "color": "#e0762b",
+      "contact": "饮食服务中心 021-8800-1002",
+      "description": "三层分区经营，一层面食早点、二层地方风味（川湘、江浙、西北）、三层轻食与水吧。菜品更新频率最高，适合同学结伴用餐。"
+    },
+    {
+      "id": "CT03",
+      "name": "第三食堂",
+      "shortName": "三食堂",
+      "location": "体育馆北侧",
+      "brand": "清真餐厅 · 智能结算",
+      "floor": 1,
+      "seats": 600,
+      "openHours": ["06:30-09:00", "11:00-13:30", "16:30-19:30"],
+      "openTime": "06:30",
+      "closeTime": "19:30",
+      "avgPrice": 14.2,
+      "rating": 4.4,
+      "stallCount": 8,
+      "dishCount": 62,
+      "floors": [{ "level": 1, "name": "一层 · 清真餐线与智能结算区", "stalls": 8 }],
+      "tags": ["清真餐线", "自助结算", "环境安静"],
+      "position3d": { "x": 22, "z": 0, "width": 13, "depth": 11, "height": 5 },
+      "color": "#3fa36b",
+      "contact": "饮食服务中心 021-8800-1003",
+      "description": "设有独立清真餐线与智能称重结算台，取餐后放上餐台自动识别菜品并计价，平均结算时间 8 秒，是全校结算最快的食堂。"
+    }
+  ]
+}

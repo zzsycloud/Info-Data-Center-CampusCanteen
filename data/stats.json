@@ -1,0 +1,111 @@
+{
+  "meta": {
+    "dataset": "食堂客流与满意度月报",
+    "version": "1.0.0",
+    "updated": "2025-01-06",
+    "academicYear": "2024-2025 学年",
+    "note": "本项目全部图表数据均以本文件与 dishes.json、nutrition.json 为唯一数据源，页面不做任何硬编码修正。",
+    "sampleNote": "客流数据由校门禁闸机与校园卡刷卡记录按小时聚合后抽样 5% 得到；满意度来自 2024 年 11 月线上问卷（有效样本 1 286 份）。",
+    "hours": ["06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"],
+    "weekdays": ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
+  },
+  "traffic": {
+    "CT01": {
+      "holidayIndex": 84,
+      "hourly": [40, 260, 150, 60, 120, 780, 1560, 640, 110, 70, 90, 560, 980, 380, 120, 45],
+      "hourlyWeekend": [20, 130, 90, 55, 140, 620, 1180, 520, 95, 65, 110, 480, 760, 260, 80, 30]
+    },
+    "CT02": {
+      "holidayIndex": 100,
+      "hourly": [35, 300, 190, 80, 160, 860, 1420, 700, 150, 110, 140, 690, 1180, 470, 180, 70],
+      "hourlyWeekend": [18, 150, 120, 70, 180, 700, 1080, 560, 130, 100, 160, 600, 940, 340, 130, 50]
+    },
+    "CT03": {
+      "holidayIndex": 62,
+      "hourly": [25, 210, 110, 45, 90, 520, 880, 420, 80, 50, 70, 400, 640, 240, 70, 25],
+      "hourlyWeekend": [15, 95, 60, 35, 100, 430, 700, 330, 65, 45, 80, 340, 520, 180, 55, 20]
+    }
+  },
+  "waitMinutes": {
+    "CT01": [0, 1, 2, 2, 2, 8, 14, 6, 1, 0, 1, 7, 11, 4, 1, 0],
+    "CT02": [0, 1, 2, 3, 3, 10, 17, 8, 2, 1, 2, 8, 13, 5, 2, 1],
+    "CT03": [0, 1, 1, 1, 1, 4, 7, 3, 1, 0, 1, 3, 5, 2, 1, 0]
+  },
+  "satisfaction": {
+    "dimensions": ["菜品口味", "价格实惠", "出餐速度", "环境卫生", "服务态度", "菜品丰富度"],
+    "scaleMax": 5,
+    "radar": {
+      "CT01": [4.25, 4.62, 4.35, 4.10, 4.05, 3.85],
+      "CT02": [4.62, 4.05, 4.15, 4.45, 4.30, 4.70],
+      "CT03": [4.30, 4.38, 4.72, 4.55, 4.40, 4.12],
+      "全校平均": [4.39, 4.35, 4.41, 4.37, 4.25, 4.22]
+    },
+    "scoreDistribution": {
+      "labels": ["5 分 非常满意", "4 分 满意", "3 分 一般", "2 分 不满意", "1 分 非常不满意"],
+      "counts": [468, 542, 196, 58, 22]
+    },
+    "suggestions": [
+      { "text": "增加低热量、少油少盐的窗口", "count": 312 },
+      { "text": "午高峰增加备用售饭窗口、缩短排队", "count": 286 },
+      { "text": "晚餐延长营业时间至 20:30", "count": 174 },
+      { "text": "及时补充售罄菜品", "count": 143 },
+      { "text": "增加清真与素食菜品比例", "count": 108 }
+    ]
+  },
+  "weeklyVisits": {
+    "labels": ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+    "CT01": [3190, 3250, 3320, 3280, 3010, 1720, 1580],
+    "CT02": [3560, 3620, 3710, 3650, 3420, 2140, 1960],
+    "CT03": [1960, 2010, 2080, 2040, 1890, 1120, 980]
+  },
+  "nutrition": {
+    "standard": "中国居民膳食指南（2022）午餐建议：热量 600-900 kcal，蛋白质 ≥ 25 g，脂肪 20-35 g，碳水 90-140 g，钠 ≤ 1200 mg。",
+    "note": "下列数值为按标准配比折算的单份营养参考值，与实际出餐存在 ±10% 误差。",
+    "items": [
+      { "name": "红烧肉盖饭", "calories": 760, "protein": 28, "fat": 34, "carbs": 84, "sodium": 1180, "fiber": 3.2 },
+      { "name": "宫保鸡丁盖饭", "calories": 690, "protein": 31, "fat": 26, "carbs": 80, "sodium": 1090, "fiber": 4.1 },
+      { "name": "兰州牛肉拉面", "calories": 620, "protein": 30, "fat": 18, "carbs": 88, "sodium": 1320, "fiber": 3.6 },
+      { "name": "水煮肉片", "calories": 810, "protein": 34, "fat": 48, "carbs": 52, "sodium": 1560, "fiber": 5.2 },
+      { "name": "鸡胸肉沙拉", "calories": 320, "protein": 35, "fat": 9, "carbs": 26, "sodium": 620, "fiber": 6.8 },
+      { "name": "龙井虾仁", "calories": 380, "protein": 36, "fat": 14, "carbs": 24, "sodium": 880, "fiber": 2.4 },
+      { "name": "新疆手抓饭", "calories": 740, "protein": 30, "fat": 28, "carbs": 92, "sodium": 980, "fiber": 4.4 },
+      { "name": "清蒸鲈鱼", "calories": 320, "protein": 38, "fat": 11, "carbs": 12, "sodium": 760, "fiber": 1.6 },
+      { "name": "藜麦蔬菜碗", "calories": 280, "protein": 14, "fat": 7, "carbs": 42, "sodium": 540, "fiber": 7.6 },
+      { "name": "大盘鸡拌面", "calories": 1080, "protein": 44, "fat": 42, "carbs": 128, "sodium": 1680, "fiber": 5.8 }
+    ],
+    "categoryAverage": [
+      { "category": "盖浇饭", "calories": 668, "protein": 25.4, "fat": 24.6, "carbs": 82 },
+      { "category": "面食", "calories": 612, "protein": 23.8, "fat": 18.2, "carbs": 86 },
+      { "category": "川湘菜", "calories": 752, "protein": 33.2, "fat": 36.4, "carbs": 58 },
+      { "category": "江浙菜", "calories": 528, "protein": 33.4, "fat": 22.6, "carbs": 42 },
+      { "category": "西北菜", "calories": 824, "protein": 36.4, "fat": 33.6, "carbs": 88 },
+      { "category": "轻食", "calories": 340, "protein": 25.6, "fat": 11.6, "carbs": 32 },
+      { "category": "清真", "calories": 668, "protein": 31.6, "fat": 22.4, "carbs": 78 },
+      { "category": "素菜", "calories": 156, "protein": 4.8, "fat": 7.2, "carbs": 16 },
+      { "category": "早餐", "calories": 352, "protein": 12.2, "fat": 11.4, "carbs": 52 },
+      { "category": "汤品", "calories": 80, "protein": 5.0, "fat": 3.0, "carbs": 8 },
+      { "category": "饮品", "calories": 190, "protein": 3.2, "fat": 4.6, "carbs": 33 },
+      { "category": "风味小吃", "calories": 458, "protein": 16.4, "fat": 18.8, "carbs": 58 }
+    ]
+  },
+  "trends": {
+    "labels": ["1 月", "2 月", "3 月", "4 月", "5 月", "6 月", "7 月", "8 月", "9 月", "10 月", "11 月", "12 月"],
+    "series": [
+      { "key": "CT01", "name": "第一食堂", "type": "line", "smooth": true, "unit": "人次", "data": [92000, 51000, 118000, 121000, 124000, 96000, 38000, 42000, 126000, 129000, 125000, 88000] },
+      { "key": "CT02", "name": "第二食堂", "type": "line", "smooth": true, "unit": "人次", "data": [104000, 62000, 132000, 138000, 141000, 108000, 44000, 47000, 142000, 146000, 143000, 101000] },
+      { "key": "CT03", "name": "第三食堂", "type": "line", "smooth": true, "unit": "人次", "data": [58000, 32000, 72000, 74000, 76000, 59000, 24000, 26000, 77000, 79000, 76000, 54000] },
+      { "key": "AVG_PRICE", "name": "人均消费", "type": "bar", "unit": "元", "data": [10.8, 11.2, 11.4, 11.6, 11.9, 12.1, 12.0, 11.8, 12.4, 12.6, 12.8, 13.1] }
+    ],
+    "canteenAvgPrice": [
+      { "key": "CT01", "name": "第一食堂", "value": 11.5 },
+      { "key": "CT02", "name": "第二食堂", "value": 16.8 },
+      { "key": "CT03", "name": "第三食堂", "value": 14.2 }
+    ],
+    "scatterNote": "横轴为菜品单价，纵轴为学生评分（气泡大小表示上月销量），只统计月销 600 份以上的菜品。"
+  },
+  "derivedRule": {
+    "note": "为避免同一指标出现两份互相矛盾的数据，菜品类目分布、价格区间分布、各类别均价、各食堂菜品均价一律由 data/dishes.json 在前端实时折算，不在此文件中重复保存。",
+    "functions": ["CC.derive.computeCategoryShare", "CC.derive.computePriceBins", "CC.derive.computePriceStats", "CC.derive.computeCanteenAvgPrice"],
+    "verifiedBy": "数据校验脚本"
+  }
+}

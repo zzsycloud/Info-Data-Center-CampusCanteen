@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "dataset": "食堂公告与运营动态",
+    "version": "1.0.0",
+    "note": "首页公告栏与运行提示使用。type 取值：notice 公告 / supply 供应 / price 价格 / event 活动 / warn 提醒。"
+  },
+  "list": [
+    { "id": "N001", "date": "2025-01-06", "canteenId": "CT02", "type": "event", "level": "info", "title": "第二食堂三层水吧「杨枝甘露」新品上线", "content": "1 月 6 日起三层水吧新增杨枝甘露，首周 8 折，每日限量 200 杯。" },
+    { "id": "N002", "date": "2025-01-05", "canteenId": "CT01", "type": "warn", "level": "warning", "title": "第一食堂二层小炒窗口 1 月 8 日设备检修", "content": "1 月 8 日 14:00-17:00 二层特色小炒暂停营业，请前往一层大众窗口就餐。" },
+    { "id": "N003", "date": "2025-01-04", "canteenId": null, "type": "supply", "level": "info", "title": "期末周延长晚餐供应时间", "content": "1 月 6 日至 1 月 17 日期末考试周，三个食堂晚餐统一延长至 20:00。" },
+    { "id": "N004", "date": "2025-01-03", "canteenId": "CT03", "type": "notice", "level": "info", "title": "第三食堂智能结算台新增刷脸支付", "content": "结算台已支持校园卡、二维码与刷脸三种方式，首次使用需在自助机绑定。" },
+    { "id": "N005", "date": "2025-01-02", "canteenId": "CT02", "type": "price", "level": "info", "title": "轻食档口推出 15 元营养套餐", "content": "鸡胸肉沙拉 + 鲜榨橙汁组合价 15 元，午晚餐时段供应。" },
+    { "id": "N006", "date": "2024-12-30", "canteenId": "CT01", "type": "notice", "level": "info", "title": "第一食堂早餐窗口新增紫米饭团", "content": "每日 06:30 起供应，售价 5.5 元，售完为止。" },
+    { "id": "N007", "date": "2024-12-28", "canteenId": null, "type": "warn", "level": "danger", "title": "元旦假期食堂营业时间调整", "content": "1 月 1 日仅第二食堂一层正常营业（07:00-19:00），其余食堂休息一天。" },
+    { "id": "N008", "date": "2024-12-26", "canteenId": "CT03", "type": "event", "level": "info", "title": "第三食堂「清真美食周」", "content": "12 月 26 日至 30 日推出抓饭、烤包子、酸奶粽子等 6 款限定菜品。" },
+    { "id": "N009", "date": "2024-12-24", "canteenId": "CT02", "type": "notice", "level": "warning", "title": "第二食堂二层川湘档辣椒油更换品牌", "content": "因供应商调整，辣度略有提升，不能吃辣的同学请提前告知少辣。" },
+    { "id": "N010", "date": "2024-12-20", "canteenId": null, "type": "supply", "level": "info", "title": "校园卡线上充值功能上线", "content": "通过「示范大学后勤」小程序可实时充值，充值后 1 分钟内到账。" },
+    { "id": "N011", "date": "2024-12-18", "canteenId": "CT01", "type": "price", "level": "info", "title": "第一食堂大众窗口素菜降价 0.5 元", "content": "清炒时蔬、蒜蓉粉丝蒸娃娃菜等 4 款素菜统一下调 0.5 元。" },
+    { "id": "N012", "date": "2024-12-15", "canteenId": "CT02", "type": "event", "level": "info", "title": "「我最喜爱的食堂菜品」投票结束", "content": "共 1 286 名同学参与投票，兰州牛肉拉面、红烧肉盖饭、烤羊肉串位列前三。" }
+  ]
+}
